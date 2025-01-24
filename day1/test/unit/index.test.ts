@@ -10,8 +10,6 @@ import {
     CreateBits,
 } from "../../wallet/index";
 
-import * as bip39 from 'bip39'
-
 describe("unit test file", () => {
     // Test address creation
 
