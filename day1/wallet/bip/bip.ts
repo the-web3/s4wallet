@@ -37,12 +37,12 @@ export function mnemonicToSeed(params: { mnemonic: any; password: any; }) {
   return bip39.mnemonicToSeedSync(mnemonic, password);
 }
 
-export function mnemonicToEntropy(params: { mnemonic: any; password: any; }) {
-  const { mnemonic, password } = params;
+export function mnemonicToEntropy(params: { mnemonic: any; language: any; }) {
+  const { mnemonic, language } = params;
 
   if (!mnemonic) throw new Error('Must have mnemonic');
 
-  return bip39.mnemonicToEntropy(mnemonic, password);
+  return bip39.mnemonicToEntropy(mnemonic, bip39.wordlists[language]);
 }
 
 export function validateMnemonic(params: { mnemonic: any; language: any; }) {
