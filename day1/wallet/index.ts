@@ -41,7 +41,6 @@ export function CreateMnemonic() {
     console.log(mnemonic);
 }
 
-
 // 2. 助记词的验证
 // - 检查单词的数量是否落在 12，15，18，21 和 24
 // - 检查单词是否在 2048 个单词里面，任何一个词不在这个词库里面都是无效的助记词
@@ -50,8 +49,11 @@ export function CreateMnemonic() {
 // - 计算校验和：
 // - 验证校验和
 export function VerifyMnemonic(originMnemonic:string[]):boolean{
-    // 熵+校验和：111001111000101010110101011101001001010001101100011000010010010100110110110110101100011001100101110011000001000101111101000010000110
-    // 助记词:travel,fiber,frog,churn,ship,myth,swarm,flee,grape,gauge,gap,awkward
+    // 随机熵：11110111000000100001111000111101000110101010101000101101000010101100110000111000110100010011101011000100000110110010010101000100
+    // 校验和：0100
+    // 熵+校验和：111101110000001000011110001111010001101010101010001011010000101011001100001110001101000100111010110001000001101100100101010001000100
+    // 助记词:warfare,axis,monster,crystal,people,lyrics,couch,boss,depart,camp,sing,mass
+
     const validateNums :number[] = [12,15,18,21,24]
     const inRange:boolean = validateNums.some((e:number) => e == originMnemonic.length)
     if(!inRange){
@@ -74,7 +76,23 @@ export function VerifyMnemonic(originMnemonic:string[]):boolean{
             }
         }
     }
-    if(bits.length == 132 &&  bits == "111001111000101010110101011101001001010001101100011000010010010100110110110110101100011001100101110011000001000101111101000010000110"){
+    // 提取随机熵和校验和
+    const entropyString:string = bits.slice(0,128)
+    const entropy = new Uint8Array(16);
+    for (let i = 0; i < 16; i++) {
+        // 每8位为一个字节
+        const byteStr = entropyString.slice(i * 8, (i + 1) * 8);
+        entropy[i] = parseInt(byteStr, 2); // 将8位二进制字符串转换为十进制数
+    }
+    const sum:string = bits.slice(128,132)
+    // 校验seed hash后前4位是否等于sum
+    // 计算校验和
+    const hash = crypto_ts.createHash('sha256').update(entropy).digest();
+    // 取前四位
+    const checksum = hash[0] >>4; //移位直接取前四
+
+    const toSum = checksum.toString(2).padStart(4,'0')
+    if(toSum == sum){
         console.log("熵+校验和验证成功")
         return true
     }
@@ -82,6 +100,8 @@ export function VerifyMnemonic(originMnemonic:string[]):boolean{
 
     return false
 
+
 }
-const mnemonics:string = "travel,fiber,frog,churn,ship,myth,swarm,flee,grape,gauge,gap,awkward"
+
+const mnemonics:string = "warfare,axis,monster,crystal,people,lyrics,couch,boss,depart,camp,sing,mass"
 VerifyMnemonic(mnemonics.split(","))
